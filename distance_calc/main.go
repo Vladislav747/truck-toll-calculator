@@ -2,18 +2,22 @@ package main
 
 import (
 	"fmt"
-	consumer2 "github.com/Vladislav747/truck-toll-calculator/distance_calc/consumer"
+	consumer "github.com/Vladislav747/truck-toll-calculator/distance_calc/consumer"
+	service "github.com/Vladislav747/truck-toll-calculator/distance_calc/service"
 	"log"
 )
 
-type DistanceCalculator struct {
-	consumer consumer2.DataConsumer
-}
+var kafkaTopic string = "obuData"
 
-var kafkaTopic string = "obudata"
+//Transport (HTTP< GRPC) -> attcah business logic
 
 func main() {
-	kafkaConsumer, err := consumer2.NewKafkaConsumer(kafkaTopic)
+	var (
+		err error
+		svc service.CalculatorServicer
+	)
+	svc = service.NewCalculatorService()
+	kafkaConsumer, err := consumer.NewKafkaConsumer(kafkaTopic, svc)
 	if err != nil {
 		log.Fatal(err)
 	}

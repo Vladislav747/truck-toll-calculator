@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-var kafkaTopic string = "obudata"
+var kafkaTopic string = "obuData"
 
 func main() {
 
