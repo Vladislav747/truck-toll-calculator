@@ -3,11 +3,16 @@ package main
 import (
 	"fmt"
 	consumer "github.com/Vladislav747/truck-toll-calculator/distance_calc/consumer"
+	"github.com/Vladislav747/truck-toll-calculator/distance_calc/middleware"
 	service "github.com/Vladislav747/truck-toll-calculator/distance_calc/service"
+	"github.com/Vladislav747/truck-toll-calculator/invoicer/client"
 	"log"
 )
 
-var kafkaTopic string = "obuData"
+const (
+	kafkaTopic         = "obuData"
+	aggregatorEndpoint = "http://127.0.0.1:3000/aggregate"
+)
 
 //Transport (HTTP< GRPC) -> attcah business logic
 
@@ -17,7 +22,8 @@ func main() {
 		svc service.CalculatorServicer
 	)
 	svc = service.NewCalculatorService()
-	kafkaConsumer, err := consumer.NewKafkaConsumer(kafkaTopic, svc)
+	svc = middleware.NewLogMiddleware(svc)
+	kafkaConsumer, err := consumer.NewKafkaConsumer(kafkaTopic, svc, client.NewClient(aggregatorEndpoint))
 	if err != nil {
 		log.Fatal(err)
 	}
