@@ -20,6 +20,12 @@ make receiver
 make obu
 ```
 
+- Запускаем invoice - куда мы обрабатываем данные через запрос - типо микросервиса
+
+```
+make invoice
+```
+
 - Запускаем consumer
 ```
 make calculator

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/Vladislav747/truck-toll-calculator/types"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -22,10 +23,13 @@ func (c *Client) AggregateInvoice(distance types.Distance) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("GET", c.Endpoint+"/invoice/aggregate", bytes.NewReader(b))
+	req, err := http.NewRequest("GET", c.Endpoint, bytes.NewReader(b))
 	if err != nil {
 		return err
 	}
-	http.DefaultClient.Do(req)
+	_, err = http.DefaultClient.Do(req)
+	if err != nil {
+		logrus.Error(err, "Send query to /invoice/aggregate")
+	}
 	return nil
 }
