@@ -27,3 +27,7 @@ func (m *MemoryStore) Get(id int) (float64, error) {
 	}
 	return dist, nil
 }
+
+func (m *MemoryStore) Invoice(id int) (*types.Invoice, error) {
+	return nil, nil
+}

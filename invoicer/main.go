@@ -7,7 +7,7 @@ import (
 	"github.com/Vladislav747/truck-toll-calculator/invoicer/service"
 	store2 "github.com/Vladislav747/truck-toll-calculator/invoicer/store"
 	"github.com/Vladislav747/truck-toll-calculator/types"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 )
@@ -53,11 +53,14 @@ func handleInvoice(svc service.Aggregator) http.HandlerFunc {
 		fmt.Println(values, "values")
 		obuId, err := strconv.Atoi(values[0])
 		if err != nil {
-			log.Println("error converting to int", err)
+			logrus.Println("error converting to int", err)
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid OBU ID"})
 			return
 		}
-		distance, err := svc.DistanceSum(obuId)
+		distance, err := svc.CalculateInvoice(obuId)
+		if err != nil {
+
+		}
 		writeJSON(w, http.StatusOK, map[string]any{"distance": distance})
 	}
 }

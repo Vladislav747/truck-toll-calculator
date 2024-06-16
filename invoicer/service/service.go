@@ -6,6 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const basePrice = 0.15
+
 type Aggregator interface {
 	AggregateDistance(distance types.Distance) error
 	DistanceSum(int) (float64, error)
@@ -42,14 +44,14 @@ func (i *InvoiceAggregator) CalculateInvoice(obuId int) (*types.Invoice, error) 
 	fmt.Println("calculating invoice - obuId: ", obuId)
 	dist, err := i.store.Get(obuId)
 	if err != nil {
-		logrus.Errorf("obu id (%d) not found", obuId)
+		logrus.Errorf("obu id (%d) not found - error: (%s)", obuId, err)
 		return nil, fmt.Errorf("obu id (%d) not found", obuId)
 	}
 
 	inv := &types.Invoice{
 		OBUID:         obuId,
 		TotalDistance: dist,
-		TotalAmount:   0,
+		TotalAmount:   basePrice * dist,
 	}
 	return inv, nil
 }
