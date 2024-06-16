@@ -59,7 +59,8 @@ func handleInvoice(svc service.Aggregator) http.HandlerFunc {
 		}
 		distance, err := svc.CalculateInvoice(obuId)
 		if err != nil {
-
+			logrus.Println("error calculating", err)
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "error calculating"})
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"distance": distance})
 	}

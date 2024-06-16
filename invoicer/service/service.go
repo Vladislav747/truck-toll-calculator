@@ -10,7 +10,6 @@ const basePrice = 0.15
 
 type Aggregator interface {
 	AggregateDistance(distance types.Distance) error
-	DistanceSum(int) (float64, error)
 	CalculateInvoice(int) (*types.Invoice, error)
 }
 
@@ -33,11 +32,6 @@ func NewInvoiceAggregator(store Storer) *InvoiceAggregator {
 func (i *InvoiceAggregator) AggregateDistance(distance types.Distance) error {
 	fmt.Println("processing and inserting distance in the storage:", distance)
 	return i.store.Insert(distance)
-}
-
-func (i *InvoiceAggregator) DistanceSum(obuId int) (float64, error) {
-	fmt.Println("calculating sum distance in the storage - obuId: ", obuId)
-	return i.store.Get(obuId)
 }
 
 func (i *InvoiceAggregator) CalculateInvoice(obuId int) (*types.Invoice, error) {
