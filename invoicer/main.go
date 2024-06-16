@@ -23,6 +23,7 @@ func main() {
 func makeHTTPTransport(listenAddr string, svc service.Aggregator) {
 	fmt.Println("HTTP Transport Listening on " + listenAddr)
 	http.HandleFunc("/aggregate", handleAggregate(svc))
+	http.HandleFunc("/invoice", handleInvoice(svc))
 	http.ListenAndServe(listenAddr, nil)
 }
 
@@ -37,6 +38,18 @@ func handleAggregate(svc service.Aggregator) http.HandlerFunc {
 			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 			return
 		}
+	}
+}
+
+func handleInvoice(svc service.Aggregator) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		values, ok := r.URL.Query()["obu"]
+		if !ok {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing OBU ID"})
+			return
+		}
+		fmt.Println(values, "values")
+		w.Write([]byte("need to return the invoice for the OBU ID"))
 	}
 }
 
