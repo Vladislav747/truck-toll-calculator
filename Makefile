@@ -10,8 +10,13 @@ calculator:
 	@go build -o bin/distance_calc distance_calc/main.go
 	@./bin/distance_calc
 
-invoice:
+invoicer:
 	@go build -o bin/invoicer invoicer/main.go
 	@./bin/invoicer
 
-.PHONY: obu
+proto:
+	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative types/ptypes.proto
+
+proto_grpc:
+	protoc --go-grpc_out=. --go-grpc_opt=paths=source_relative types/ptypes.proto
+.PHONY: obu invoicer
