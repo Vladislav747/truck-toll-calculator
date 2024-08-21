@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/Vladislav747/truck-toll-calculator/invoicer/client"
 	grpc2 "github.com/Vladislav747/truck-toll-calculator/invoicer/grpc"
 	"github.com/Vladislav747/truck-toll-calculator/invoicer/middleware"
 	"github.com/Vladislav747/truck-toll-calculator/invoicer/service"
@@ -11,9 +13,11 @@ import (
 	"github.com/Vladislav747/truck-toll-calculator/types"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"log"
 	"net"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func main() {
@@ -28,6 +32,18 @@ func main() {
 		mid   = middleware.NewLogMiddleware(svc)
 	)
 	go makeGRPCTransport(*grpcListenAddr, mid)
+	time.Sleep(time.Second * 5)
+	c, err := client.NewGRPCClient(*grpcListenAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if _, err := c.Aggregate(context.Background(), &types.AggregateRequest{
+		ObuId: 1,
+		Value: 56.60,
+		Unix:  time.Now().UnixNano(),
+	}); err != nil {
+		log.Fatal(err)
+	}
 	makeHTTPTransport(*httpListenAddr, mid)
 }
 
@@ -45,7 +61,10 @@ func makeGRPCTransport(listenAddr string, svc service.Aggregator) error {
 	if err != nil {
 		return err
 	}
-	defer ln.Close()
+	defer func() {
+		fmt.Println("stopping GRPC transport")
+		ln.Close()
+	}()
 	//Make a new GRPC native Server
 	server := grpc.NewServer([]grpc.ServerOption{}...)
 	// Register (OUR) GRPC server implementation to the GRPC Implemetation
