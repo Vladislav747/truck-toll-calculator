@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"context"
 	"github.com/Vladislav747/truck-toll-calculator/invoicer/service"
 	"github.com/Vladislav747/truck-toll-calculator/types"
 )
@@ -16,11 +17,11 @@ func NewAggregatorGRPCServer(svc service.Aggregator) *GRPCAggregatorServer {
 	}
 }
 
-func (s *GRPCAggregatorServer) AggregateDistance(req types.AggregateRequest) error {
+func (s *GRPCAggregatorServer) Aggregate(ctx context.Context, req *types.AggregateRequest) (*types.None, error) {
 	distance := types.Distance{
 		OBUID: int(req.ObuId),
 		Value: req.Value,
 		Unix:  req.Unix,
 	}
-	return s.svc.AggregateDistance(distance)
+	return nil, s.svc.AggregateDistance(distance)
 }

@@ -31,12 +31,15 @@ func main() {
 		svc   = service.NewInvoiceAggregator(store)
 		mid   = middleware.NewLogMiddleware(svc)
 	)
-	go makeGRPCTransport(*grpcListenAddr, mid)
+	go func() {
+		log.Fatal(makeGRPCTransport(*grpcListenAddr, mid))
+	}()
 	time.Sleep(time.Second * 5)
 	c, err := client.NewGRPCClient(*grpcListenAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Connected to gRPC server", c)
 	if _, err := c.Aggregate(context.Background(), &types.AggregateRequest{
 		ObuId: 1,
 		Value: 56.60,
@@ -44,20 +47,20 @@ func main() {
 	}); err != nil {
 		log.Fatal(err)
 	}
-	makeHTTPTransport(*httpListenAddr, mid)
+	log.Fatal(makeHTTPTransport(*httpListenAddr, mid))
 }
 
-func makeHTTPTransport(listenAddr string, svc service.Aggregator) {
+func makeHTTPTransport(listenAddr string, svc service.Aggregator) error {
 	fmt.Println("HTTP Transport Listening on " + listenAddr)
 	http.HandleFunc("/aggregate", handleAggregate(svc))
 	http.HandleFunc("/invoice", handleInvoice(svc))
-	http.ListenAndServe(listenAddr, nil)
+	return http.ListenAndServe(listenAddr, nil)
 }
 
 func makeGRPCTransport(listenAddr string, svc service.Aggregator) error {
 	fmt.Println("gRPC Transport Listening on " + listenAddr)
 	//Make a TCP Listeners
-	ln, err := net.Listen("TCP", listenAddr)
+	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		return err
 	}

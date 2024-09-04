@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Temp code Started")
 	conn, err := grpc.Dial(":3001", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
