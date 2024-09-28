@@ -10,9 +10,9 @@ calculator:
 	@go build -o bin/distance_calc distance_calc/main.go
 	@./bin/distance_calc
 
-invoicer:
-	@go build -o bin/invoicer invoicer/main.go
-	@./bin/invoicer
+aggregator:
+	@go build -o bin/aggregator aggregator/main.go
+	@./bin/aggregator
 
 temp_temp:
 	@go build -o bin/temp_code temp/main.go

@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"context"
-	"github.com/Vladislav747/truck-toll-calculator/invoicer/service"
+	"github.com/Vladislav747/truck-toll-calculator/aggregator/service"
 	"github.com/Vladislav747/truck-toll-calculator/types"
 )
 

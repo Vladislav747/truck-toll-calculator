@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/Vladislav747/truck-toll-calculator/invoicer/client"
-	grpc2 "github.com/Vladislav747/truck-toll-calculator/invoicer/grpc"
-	"github.com/Vladislav747/truck-toll-calculator/invoicer/middleware"
-	"github.com/Vladislav747/truck-toll-calculator/invoicer/service"
-	store2 "github.com/Vladislav747/truck-toll-calculator/invoicer/store"
+	"github.com/Vladislav747/truck-toll-calculator/aggregator/client"
+	grpc2 "github.com/Vladislav747/truck-toll-calculator/aggregator/grpc"
+	"github.com/Vladislav747/truck-toll-calculator/aggregator/middleware"
+	"github.com/Vladislav747/truck-toll-calculator/aggregator/service"
+	store2 "github.com/Vladislav747/truck-toll-calculator/aggregator/store"
 	"github.com/Vladislav747/truck-toll-calculator/types"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -40,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("Connected to gRPC server", c)
-	if _, err := c.Aggregate(context.Background(), &types.AggregateRequest{
+	if err := c.Aggregate(context.Background(), &types.AggregateRequest{
 		ObuId: 1,
 		Value: 56.60,
 		Unix:  time.Now().UnixNano(),

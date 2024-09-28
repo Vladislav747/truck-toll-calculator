@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/Vladislav747/truck-toll-calculator/aggregator/client"
 	consumer "github.com/Vladislav747/truck-toll-calculator/distance_calc/consumer"
 	"github.com/Vladislav747/truck-toll-calculator/distance_calc/middleware"
 	service "github.com/Vladislav747/truck-toll-calculator/distance_calc/service"
-	"github.com/Vladislav747/truck-toll-calculator/invoicer/client"
 	"log"
 )
 
@@ -23,7 +23,14 @@ func main() {
 	)
 	svc = service.NewCalculatorService()
 	svc = middleware.NewLogMiddleware(svc)
-	kafkaConsumer, err := consumer.NewKafkaConsumer(kafkaTopic, svc, client.NewHTTPClient(aggregatorEndpoint))
+
+	httpClient := client.NewHTTPClient(aggregatorEndpoint)
+	//grpcClient, err := client.NewGRPCClient(aggregatorEndpoint)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	kafkaConsumer, err := consumer.NewKafkaConsumer(kafkaTopic, svc, httpClient)
 	if err != nil {
 		log.Fatal(err)
 	}
