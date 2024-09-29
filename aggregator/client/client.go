@@ -7,4 +7,5 @@ import (
 
 type Client interface {
 	Aggregate(ctx context.Context, client *types.AggregateRequest) error
+	GetInvoice(ctx context.Context, id int) (*types.Invoice, error)
 }

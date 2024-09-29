@@ -74,3 +74,10 @@ go get google.golang.org/grpc/
 ```
 make proto
 ```
+
+
+Возможные проблемы 
+
+- Не установлен brew install protobuf
+-  brew install protoc-gen-go
+- go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2

@@ -4,9 +4,14 @@ option go_package = "github.com/Vladislav747/truck-toll-calculator/types";
 
 service Aggregator {
   rpc Aggregate(AggregateRequest) returns (None);
+  rpc GetInvoice(GetInvoiceRequest) returns (None);
 }
 
 message None {}
+
+message GetInvoiceRequest {
+  int32 ObuID = 1;
+}
 
 message AggregateRequest {
   int32 ObuId = 1;
