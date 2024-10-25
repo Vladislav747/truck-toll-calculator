@@ -32,8 +32,8 @@ func main() {
 		svc   = service.NewInvoiceAggregator(store)
 		mid   = middleware.NewLogMiddleware(svc)
 	)
-	svc = middleware.NewMetricsMiddleware(svc)
-	svc = middleware.NewLogMiddleware(svc)
+	mid = middleware.NewMetricsMiddleware(svc)
+	mid = middleware.NewLogMiddleware(svc)
 	go func() {
 		log.Fatal(makeGRPCTransport(*grpcListenAddr, mid))
 	}()
