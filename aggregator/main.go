@@ -11,6 +11,7 @@ import (
 	"github.com/Vladislav747/truck-toll-calculator/aggregator/service"
 	store2 "github.com/Vladislav747/truck-toll-calculator/aggregator/store"
 	"github.com/Vladislav747/truck-toll-calculator/types"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"log"
@@ -31,6 +32,8 @@ func main() {
 		svc   = service.NewInvoiceAggregator(store)
 		mid   = middleware.NewLogMiddleware(svc)
 	)
+	svc = middleware.NewMetricsMiddleware(svc)
+	svc = middleware.NewLogMiddleware(svc)
 	go func() {
 		log.Fatal(makeGRPCTransport(*grpcListenAddr, mid))
 	}()
@@ -54,6 +57,7 @@ func makeHTTPTransport(listenAddr string, svc service.Aggregator) error {
 	fmt.Println("HTTP Transport Listening on " + listenAddr)
 	http.HandleFunc("/aggregate", handleAggregate(svc))
 	http.HandleFunc("/invoice", handleInvoice(svc))
+	http.Handle("/metrics", promhttp.Handler())
 	return http.ListenAndServe(listenAddr, nil)
 }
 

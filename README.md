@@ -81,3 +81,26 @@ make proto
 - Не установлен brew install protobuf
 -  brew install protoc-gen-go
 - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+
+
+## Installing Prometheus
+Install Prometheus in a Docker container
+```
+docker run -p 9090:9090 -v ./.config/prometheus.yml:etc/prometheus/prometheus.yml prom/prometheus
+```
+
+Installing Prometheus golang client
+```
+go get github.com/prometheus/client_golang/prometheus
+```
+
+Installing Prometheus
+```
+git clone https://github.com/prometheus/prometheus.git
+```
+
+Install
+```
+cd prometheus
+make build
+```

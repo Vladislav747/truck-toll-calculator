@@ -4,19 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/Vladislav747/truck-toll-calculator/aggregator/client"
 	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
+	"time"
 )
 
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
 
 func main() {
-	listenAddr := flag.String("listenAddr", ":6000", "the listen address of the GRPC server")
+	listenAddr := flag.String("listenAddr", ":6000", "the listen address of the HTTP server")
+	aggregatorServiceAddr := flag.String("aggServiceAddr", "http://localhost:3000", "the listen address of the aggregator service")
+
 	flag.Parse()
 	var (
-		client     = client.NewHTTPClient("http://localhost:3000")
+		client     = client.NewHTTPClient(*aggregatorServiceAddr) //endpoint of the aggregator service
 		invHandler = newInvoiceHandler(client)
 	)
 	http.HandleFunc("/invoice", makeAPIFunc(invHandler.handleGetInvoice))
@@ -33,6 +37,7 @@ func newInvoiceHandler(c client.Client) *InvoiceHandler {
 }
 
 func (h *InvoiceHandler) handleGetInvoice(w http.ResponseWriter, r *http.Request) error {
+	fmt.Println("hitting the get invoice inside the gateway ")
 	inv, err := h.client.GetInvoice(context.Background(), 123)
 	if err != nil {
 		return err
@@ -49,6 +54,11 @@ func writeJSON(w http.ResponseWriter, code int, v any) error {
 
 func makeAPIFunc(fn apiFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		defer func(start time.Time) {
+			logrus.WithFields(logrus.Fields{
+				"took": time.Since(start),
+			}).Info()
+		}(time.Now())
 		if err := fn(w, r); err != nil {
 			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		}
