@@ -14,6 +14,9 @@ calculator:
 	@go build -o bin/distance_calc distance_calc/main.go
 	@./bin/distance_calc
 
+aggregator:
+	@go build -o bin/aggregator aggregator/main.go
+	@./bin/aggregator
 
 temp_temp:
 	@go build -o bin/temp_code temp/main.go
