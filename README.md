@@ -104,3 +104,8 @@ Install
 cd prometheus
 make build
 ```
+
+Запускаем prometheus локально - если он есть в папке выше
+```
+ ../prometheus/prometheus --config.file=.config/prometheus.yml
+```

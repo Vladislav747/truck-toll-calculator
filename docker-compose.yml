@@ -21,3 +21,29 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./.config/prometheus.yml:/etc/prometheus/prometheus.yml  # Монтирование конфигурационного файла
+      - prometheus_data:/prometheus  # Для хранения временных метрик
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.listen-address=:9090"
+      - "--storage.tsdb.path=/prometheus"
+
+
+# Объявление томов
+volumes:
+  grafana-storage:
+  prometheus_data:

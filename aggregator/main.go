@@ -23,7 +23,7 @@ import (
 
 func main() {
 
-	httpListenAddr := flag.String("httpAddr", ":3000", "the listen address of the HTTP server")
+	httpListenAddr := flag.String("httpAddr", ":4000", "the listen address of the HTTP server")
 	grpcListenAddr := flag.String("grpcAddr", ":3001", "the listen address of the GRPC server")
 
 	flag.Parse()
