@@ -11,34 +11,37 @@ import (
 	"github.com/Vladislav747/truck-toll-calculator/aggregator/service"
 	store2 "github.com/Vladislav747/truck-toll-calculator/aggregator/store"
 	"github.com/Vladislav747/truck-toll-calculator/types"
+	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
 
 func main() {
-
-	httpListenAddr := flag.String("httpAddr", ":4000", "the listen address of the HTTP server")
-	grpcListenAddr := flag.String("grpcAddr", ":3001", "the listen address of the GRPC server")
-
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading.env file")
+	}
 	flag.Parse()
 	var (
-		store = store2.NewMemoryStore()
-		svc   = service.NewInvoiceAggregator(store)
-		mid   = middleware.NewLogMiddleware(svc)
+		store          = makeStore()
+		svc            = service.NewInvoiceAggregator(store)
+		mid            = middleware.NewLogMiddleware(svc)
+		httpListenAddr = os.Getenv("AGG_HTTP_ENDPOINT")
+		grpcListenAddr = os.Getenv("AGG_GRPC_ENDPOINT")
 	)
 	mid = middleware.NewMetricsMiddleware(svc)
 	mid = middleware.NewLogMiddleware(svc)
 	go func() {
-		log.Fatal(makeGRPCTransport(*grpcListenAddr, mid))
+		log.Fatal(makeGRPCTransport(grpcListenAddr, mid))
 	}()
 	time.Sleep(time.Second * 5)
-	c, err := client.NewGRPCClient(*grpcListenAddr)
+	c, err := client.NewGRPCClient(grpcListenAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,7 +53,7 @@ func main() {
 	}); err != nil {
 		log.Fatal(err)
 	}
-	log.Fatal(makeHTTPTransport(*httpListenAddr, mid))
+	log.Fatal(makeHTTPTransport(httpListenAddr, mid))
 }
 
 func makeHTTPTransport(listenAddr string, svc service.Aggregator) error {
@@ -100,6 +103,10 @@ func handleAggregate(svc service.Aggregator) http.HandlerFunc {
 
 func handleInvoice(svc service.Aggregator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "method GET is not allowed"})
+			return
+		}
 		values, ok := r.URL.Query()["obu"]
 		if !ok {
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing OBU ID"})
@@ -118,6 +125,17 @@ func handleInvoice(svc service.Aggregator) http.HandlerFunc {
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "error calculating"})
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"distance": distance})
+	}
+}
+
+func makeStore() service.Storer {
+	storerType := os.Getenv("AGG_STORAGE_TYPE")
+	switch storerType {
+	case "memory":
+		return store2.NewMemoryStore()
+	default:
+		log.Fatal("Unsupported storage type: %s", storerType)
+		return nil
 	}
 }
 
