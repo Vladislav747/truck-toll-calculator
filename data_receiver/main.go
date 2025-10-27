@@ -1,26 +1,42 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/Vladislav747/truck-toll-calculator/data_receiver/middleware"
 	"github.com/Vladislav747/truck-toll-calculator/data_receiver/producer"
 	"github.com/Vladislav747/truck-toll-calculator/types"
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 )
 
 var kafkaTopic string = "obuData"
+var defaultPort string = "30000"
 
 func main() {
+	// Загрузить файл env
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading.env file")
+	}
+	flag.Parse()
+
+	port := os.Getenv("DATA_RECEIVER_PORT")
+	if port == "" {
+		port = defaultPort
+	}
 
 	recv, err := NewDataReceiver()
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	http.HandleFunc("/ws", recv.handleWS)
-	fmt.Println(" data receiver ")
-	http.ListenAndServe(":30000", nil)
+	fmt.Println("data_receiver started on", port, "port")
+	addr := ":" + port
+	http.ListenAndServe(addr, nil)
 }
 
 type DataReceiver struct {
