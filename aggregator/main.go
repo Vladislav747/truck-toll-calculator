@@ -55,10 +55,12 @@ func main() {
 }
 
 func makeHTTPTransport(listenAddr string, svc service.Aggregator) error {
-	fmt.Println("HTTP Transport Listening on " + listenAddr)
-	http.HandleFunc("/aggregate", http2.HandleAggregate(svc))
-	http.HandleFunc("/invoice", http2.HandleInvoice(svc))
+	aggMetricsHandler := http2.NewHTTPMetricsHandler("aggregator")
+	invoiceMetricsHandler := http2.NewHTTPMetricsHandler("invoice")
+	http.HandleFunc("/aggregate", aggMetricsHandler.Instrument(http2.HandleAggregate(svc)))
+	http.HandleFunc("/invoice", invoiceMetricsHandler.Instrument(http2.HandleInvoice(svc)))
 	http.Handle("/metrics", promhttp.Handler())
+	fmt.Println("HTTP Transport Listening on " + listenAddr)
 	return http.ListenAndServe(listenAddr, nil)
 }
 

@@ -109,3 +109,9 @@ make build
 ```
  ../prometheus/prometheus --config.file=.config/prometheus.yml
 ```
+
+Посмотреть метрики prometheus
+
+```
+http://localhost:4000/metrics
+```

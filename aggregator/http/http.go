@@ -9,26 +9,48 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type HTTPMetricsHandler struct {
 	reqCounter prometheus.Counter
+	reqLatency prometheus.Histogram
 }
 
-func newHTTPMetricsHandler(reqName string) *HTTPMetricsHandler {
+func NewHTTPMetricsHandler(reqName string) *HTTPMetricsHandler {
+
 	reqCounter := prometheus.NewCounter(prometheus.CounterOpts{
-		Name:      "http_request_total",
-		Namespace: fmt.Sprintf("http_%s_%s", reqName, "req_counter"),
+		Name:      fmt.Sprintf("http_%s", reqName),
+		Namespace: fmt.Sprintf("http_%s_%s", reqName, "request_counter"),
 		Help:      "Total number of HTTP requests",
 	})
+
+	reqLatency := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name:      fmt.Sprintf("http_%s", reqName),
+		Namespace: fmt.Sprintf("http_%s_%s", reqName, "request_latency"),
+		Help:      "Latency of HTTP requests",
+		Buckets:   []float64{0.1, 0.5, 1},
+	})
+	prometheus.MustRegister(reqCounter)
+	prometheus.MustRegister(reqLatency)
 	return &HTTPMetricsHandler{
 		reqCounter: reqCounter,
+		reqLatency: reqLatency,
 	}
 }
 
-func (h *HTTPMetricsHandler) instrument(next http.Handler) http.HandlerFunc {
-	h.reqCounter.Inc()
+func (h *HTTPMetricsHandler) Instrument(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		defer func(start time.Time) {
+			latency := time.Since(start).Seconds()
+			logrus.WithFields(logrus.Fields{
+				"latency": latency,
+				"request": r.RequestURI,
+			}).Info()
+			h.reqLatency.Observe(time.Since(start).Seconds())
+		}(time.Now())
+		h.reqCounter.Inc()
 		next.ServeHTTP(w, r)
 	}
 }

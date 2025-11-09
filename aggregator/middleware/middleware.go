@@ -45,6 +45,12 @@ func NewMetricsMiddleware(next service.Aggregator) *MetricsMiddleware {
 		Name:      "calculate",
 		Buckets:   []float64{0.1, 0.5, 1},
 	})
+	prometheus.MustRegister(errCounterAgg)
+	prometheus.MustRegister(errCounterCalc)
+	prometheus.MustRegister(reqCounterAgg)
+	prometheus.MustRegister(reqCounterCalc)
+	prometheus.MustRegister(reqLatencyAgg)
+	prometheus.MustRegister(reqLatencyCalc)
 	return &MetricsMiddleware{
 		next:           next,
 		reqCounterAgg:  reqCounterAgg,
